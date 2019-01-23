@@ -1,18 +1,18 @@
+#include <ctype.h>
 #include <defs.h>
-#include <errno.h>
-#include <stdio.h>
-#include <dmacman.h>
 #include <dev9.h>
+#include <dmacman.h>
+#include <errno.h>
 #include <intrman.h>
+#include <irx.h>
 #include <loadcore.h>
 #include <modload.h>
 #include <stdio.h>
+#include <string.h>
 #include <sysclib.h>
-#include <ctype.h>
 #include <thbase.h>
 #include <thevent.h>
 #include <thsemap.h>
-#include <irx.h>
 
 #include <netman.h>
 
