@@ -10,6 +10,7 @@
 
 .set noreorder
 .set nomacro
+.set noat
 
 .globl _MPEG_Initialize
 .globl _MPEG_Destroy
@@ -2265,4 +2266,3 @@ _MPEG_avg_chroma_XY:
     addu    $at, $zero, $zero
     jr      $ra
     nop
-
