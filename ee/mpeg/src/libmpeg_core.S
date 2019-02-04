@@ -10,7 +10,6 @@
 
 .set noreorder
 .set nomacro
-.set noat
 
 .globl _MPEG_Initialize
 .globl _MPEG_Destroy
