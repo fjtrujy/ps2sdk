@@ -22,7 +22,7 @@ EE_CFLAGS := -D_EE -G0 -O2 -Wall -Werror $(EE_INCS) $(EE_CFLAGS)
 EE_CXXFLAGS := -D_EE -G0 -O2 -Wall -Werror $(EE_INCS) $(EE_CXXFLAGS)
 
 # Linker flags
-# EE_LDFLAGS := $(EE_LDFLAGS)
+# EE_LDFLAGS := -Wl,-zmax-page-size=4096 $(EE_LDFLAGS)
 
 # Assembler flags
 EE_ASFLAGS := $(EE_ASFLAGS)
