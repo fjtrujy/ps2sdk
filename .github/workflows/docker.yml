@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - master-trujy
     tags:
       - v*
   repository_dispatch:
