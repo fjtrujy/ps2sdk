@@ -58,12 +58,25 @@ static inline void CopyFromFIFO(volatile u8 *smap_regbase, void *buffer, unsigne
     }
 }
 
+/* Max Ethernet frame size (1514 bytes) rounded up to 4-byte boundary */
+#define SMAP_MAX_FRAME_SIZE_ALIGNED 1516
+
+static u8 TxAlignedBuf[SMAP_MAX_FRAME_SIZE_ALIGNED] __attribute__((aligned(4)));
+
 static inline void CopyToFIFO(volatile u8 *smap_regbase, const void *buffer, unsigned int length)
 {
     int i, result;
 
     if (buffer == NULL) {
         return;
+    }
+
+    /* DMA and 32-bit FIFO writes require 4-byte aligned source.
+     * Upstream lwIP PBUF_RAM payloads land at 2-byte alignment (ETH+IP+TCP headers = 54 bytes ≡ 2 mod 4).
+     * Copy to a static aligned buffer when needed. */
+    if ((unsigned int)buffer & 3) {
+        memcpy(TxAlignedBuf, buffer, length);
+        buffer = TxAlignedBuf;
     }
 
     result = SmapDmaTransfer(smap_regbase, (void *)buffer, length, DMAC_FROM_MEM);
