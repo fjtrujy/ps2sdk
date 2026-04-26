@@ -103,12 +103,19 @@
 #define MEMP_NUM_TCP_SEG		TCP_SND_QUEUELEN
 
 /**
- * LWIP_TCPIP_CORE_LOCKING_INPUT: when LWIP_TCPIP_CORE_LOCKING is enabled,
- * this lets tcpip_input() grab the mutex for input packets as well,
- * instead of allocating a message and passing it to tcpip_thread.
- *
- * ATTENTION: this does not work when tcpip_input() is called from
- * interrupt context!
+ * LWIP_TCPIP_CORE_LOCKING==1: matches lwIP 2.2.1's upstream default. With
+ * LWIP_COMPAT_MUTEX in arch/cc.h the core lock is a binary semaphore taken
+ * directly on the calling app thread for socket/netconn API calls; lwIP
+ * releases it before any blocking I/O wait so the tcpip thread + netif
+ * input continue to make progress. Saves a context switch + sem wait per
+ * API call versus the message-passing alternative.
+ */
+#define LWIP_TCPIP_CORE_LOCKING		1
+
+/**
+ * LWIP_TCPIP_CORE_LOCKING_INPUT==1: tcpip_input() takes the core mutex
+ * directly instead of allocating a message. Safe here because the netif
+ * input callback runs in a regular thread, not interrupt context.
  */
 #define LWIP_TCPIP_CORE_LOCKING_INPUT	1
 
@@ -134,18 +141,13 @@
 #define LWIP_DHCP		1
 #endif
 
-/**
- * DHCP_DOES_ARP_CHECK==1: Do an ARP check on the offered address.
- */
-#define DHCP_DOES_ARP_CHECK	0	//Don't do the ARP check because an IP address would be first required.
-
-/**
- * LWIP_DHCP_CHECK_LINK_UP==1: dhcp_start() only really starts if the netif has
- * NETIF_FLAG_LINK_UP set in its flags. As this is only an optimization and
- * netif drivers might not set this flag, the default is off. If enabled,
- * netif_set_link_up() must be called to continue dhcp starting.
- */
-#define LWIP_DHCP_CHECK_LINK_UP	1
+/* LWIP_DHCP_DOES_ACD_CHECK / LWIP_ACD left at upstream defaults (=1 when
+ * LWIP_DHCP=1) so the RFC 5227 Address Conflict Detection probe runs on
+ * any DHCP-offered IP. EE applications run on user home networks where
+ * IP collisions are a real (if uncommon) failure mode; the few KB of
+ * code and ~1-2 s extra DHCP-bind delay are worth the robustness. The
+ * IOP lwIP build forces both off because ps2link runs in controlled
+ * bench environments where the IRX size + tick savings matter more. */
 
 /*
    ----------------------------------
@@ -208,10 +210,6 @@
    ---------- Socket options ----------
    ------------------------------------
 */
-/* LWIP_SOCKET_SET_ERRNO==1: Set errno when socket functions cannot complete
- * successfully, as required by POSIX. Default is POSIX-compliant.
- */
-#define LWIP_SOCKET_SET_ERRNO	0
 /**
  * LWIP_POSIX_SOCKETS_IO_NAMES==1: Enable POSIX-style sockets functions names.
  * Disable this option if you use a POSIX operating system that uses the same

@@ -338,6 +338,15 @@ err_t sys_mbox_trypost(sys_mbox_t *mbox, void *sys_msg)
 	return result;
 }
 
+/* lwIP 2.2.x distinguishes ISR-context posts from task-context posts.
+   The PS2 EE has preemptive scheduling, but our netif input does not run
+   in interrupt context (it goes through ps2ip / SIF callbacks on the EE
+   tcpip thread), so the two paths are equivalent here. */
+err_t sys_mbox_trypost_fromisr(sys_mbox_t *mbox, void *msg)
+{
+	return sys_mbox_trypost(mbox, msg);
+}
+
 void sys_mbox_post(sys_mbox_t *mbox, void *sys_msg)
 {
 	SendMbx(mbox, alloc_msg(), sys_msg);
